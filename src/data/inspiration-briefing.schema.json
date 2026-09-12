@@ -1,0 +1,625 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ספריית השראה — תדריך מאוחד, גרסה 1",
+  "description": "מבנה לייבוא ידני של פלט הסוכן. בדיקת הסכמה בודקת מבנה בלבד ולא אמיתות מחקר. אין בסכמה דירוגים או הערות אישיות. יש להפעיל בדיקות format לתאריכים ולכתובות.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "briefing_id": {
+      "type": "string",
+      "pattern": "^inspiration-\\d{4}-\\d{2}-\\d{2}(?:-[A-Za-z0-9_-]+)?$"
+    },
+    "briefing_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "timezone": {
+      "const": "Asia/Jerusalem"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial",
+        "failed"
+      ]
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "enum": [
+              "workshops",
+              "education_ai",
+              "builder_updates",
+              "college_programs"
+            ]
+          },
+          "status": {
+            "enum": [
+              "complete",
+              "partial",
+              "failed",
+              "not_due"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "status",
+          "note"
+        ]
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "channel": {
+                "const": "workshops"
+              }
+            },
+            "required": [
+              "channel"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "channel": {
+                "const": "education_ai"
+              }
+            },
+            "required": [
+              "channel"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "channel": {
+                "const": "builder_updates"
+              }
+            },
+            "required": [
+              "channel"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "channel": {
+                "const": "college_programs"
+              }
+            },
+            "required": [
+              "channel"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "program_catalog_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "baseline",
+            "targeted",
+            "full"
+          ]
+        },
+        "comparison_status": {
+          "enum": [
+            "baseline_only",
+            "compared",
+            "not_compared"
+          ]
+        },
+        "verified_programs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "level": {
+                "enum": [
+                  "תואר ראשון",
+                  "תואר שני",
+                  "לימודי תעודה",
+                  "הסבת אקדמאים"
+                ]
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https?://(?:[A-Za-z0-9-]+\\.)*smkb\\.ac\\.il(?:[/?#]|$)"
+              },
+              "focus": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "level",
+              "url",
+              "focus"
+            ]
+          }
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "comparison_status",
+        "verified_programs",
+        "note"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "workshops",
+                "education_ai",
+                "builder_updates",
+                "college_programs"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 4,
+            "uniqueItems": true
+          },
+          "content_type": {
+            "enum": [
+              "workshop",
+              "webinar",
+              "research",
+              "article",
+              "tool",
+              "product_update",
+              "case_study",
+              "teaching_resource",
+              "program_update"
+            ]
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "source_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://[^\\s]+$"
+          },
+          "published_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "novelty": {
+            "enum": [
+              "newly_published",
+              "newly_discovered",
+              "material_update"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "relevance": {
+            "type": "string",
+            "minLength": 1
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "audience": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "participant_actions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pedagogical_rationale": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rationale_basis": {
+                "enum": [
+                  "stated",
+                  "inferred",
+                  null
+                ]
+              },
+              "practical_takeaway": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "access_notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "audience",
+              "participant_actions",
+              "pedagogical_rationale",
+              "rationale_basis",
+              "practical_takeaway",
+              "access_notes"
+            ]
+          },
+          "program_matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "level": {
+                  "enum": [
+                    "תואר ראשון",
+                    "תואר שני",
+                    "לימודי תעודה",
+                    "הסבת אקדמאים"
+                  ]
+                },
+                "program_url": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https?://(?:[A-Za-z0-9-]+\\.)*smkb\\.ac\\.il(?:[/?#]|$)"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "workshop_idea": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "basis": {
+                  "const": "inferred"
+                }
+              },
+              "required": [
+                "name",
+                "level",
+                "program_url",
+                "reason",
+                "workshop_idea",
+                "basis"
+              ]
+            },
+            "maxItems": 3
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https?://[^\\s]+$"
+                },
+                "supports": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "url",
+                "supports"
+              ]
+            },
+            "minItems": 1
+          },
+          "program_change": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "added",
+                      "removed",
+                      "renamed",
+                      "focus_changed"
+                    ]
+                  },
+                  "previous": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "current": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "comparison_basis": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "previous",
+                  "current",
+                  "comparison_basis"
+                ]
+              }
+            ]
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "alt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "source_url": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "usage_note": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "url",
+                  "alt",
+                  "source_url",
+                  "usage_note"
+                ]
+              }
+            ]
+          },
+          "caveat": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "channels",
+          "content_type",
+          "subjects",
+          "source_name",
+          "source_url",
+          "published_date",
+          "event_date",
+          "novelty",
+          "summary",
+          "relevance",
+          "details",
+          "program_matches",
+          "sources",
+          "program_change",
+          "image",
+          "caveat"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "content_type": {
+                  "const": "workshop"
+                }
+              },
+              "required": [
+                "content_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "details": {
+                  "properties": {
+                    "participant_actions": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "pedagogical_rationale": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "rationale_basis": {
+                      "enum": [
+                        "stated",
+                        "inferred"
+                      ]
+                    },
+                    "practical_takeaway": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "content_type": {
+                  "const": "program_update"
+                }
+              },
+              "required": [
+                "content_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "program_change": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "added",
+                        "removed",
+                        "renamed",
+                        "focus_changed"
+                      ]
+                    },
+                    "previous": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "current": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "comparison_basis": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "previous",
+                    "current",
+                    "comparison_basis"
+                  ]
+                },
+                "channels": {
+                  "contains": {
+                    "const": "college_programs"
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "program_change": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "briefing_id",
+    "briefing_date",
+    "timezone",
+    "status",
+    "coverage",
+    "program_catalog_review",
+    "limitations",
+    "items"
+  ]
+}

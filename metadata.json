@@ -1,0 +1,6 @@
+{
+  "name": "ספריית השראה",
+  "description": "ספרייה אישית מעוצבת לממצאים, סדנאות, מחקרים וכלים בחיבור בין מייקינג, טכנולוגיה ופדגוגיה, עם התאמות לתוכניות הלימוד בסמינר הקיבוצים.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
