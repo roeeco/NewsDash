@@ -28,6 +28,7 @@ import type {
   UserStatus,
 } from '../types.ts';
 import { ItemCard } from './ItemCard.tsx';
+import { ALL_CONTENT_TYPES, getContentTypeMeta } from '../lib/contentTypes.ts';
 
 interface LibraryViewProps {
   items: LibraryItem[];
@@ -40,21 +41,10 @@ interface LibraryViewProps {
   onUpdateRating: (id: string, rating: 1 | 2 | 3 | 4 | 5 | null) => void;
   onUpdateStatus: (id: string, status: UserStatus) => void;
   onOpenImport: () => void;
+  onOpenReset?: () => void;
   onFilteredItemsChange?: (filtered: LibraryItem[]) => void;
   latestBriefingId: string | null;
 }
-
-const CONTENT_TYPES: Array<{ value: ContentType; label: string }> = [
-  { value: 'workshop', label: 'סדנה' },
-  { value: 'webinar', label: 'וובינר' },
-  { value: 'research', label: 'מחקר' },
-  { value: 'article', label: 'מאמר' },
-  { value: 'tool', label: 'כלי' },
-  { value: 'product_update', label: 'עדכון מוצר' },
-  { value: 'case_study', label: 'מקרה בוחן' },
-  { value: 'teaching_resource', label: 'משאב הוראה' },
-  { value: 'program_update', label: 'עדכון תוכנית' },
-];
 
 const CHANNELS: Array<{ value: Channel; label: string }> = [
   { value: 'workshops', label: 'סדנאות למורים' },
@@ -96,6 +86,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onUpdateRating,
   onUpdateStatus,
   onOpenImport,
+  onOpenReset,
   onFilteredItemsChange,
   latestBriefingId,
 }) => {
@@ -395,44 +386,46 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Search Bar & Quick Filters */}
-      <div className="glass-panel p-5 sm:p-6 space-y-4">
+      <div className="paper-sheet p-5 sm:p-6 space-y-4">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-          {/* Main Search Input */}
+          {/* Main Search Input - Debossed Well */}
           <div className="relative flex-1">
-            <Search className="w-5 h-5 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-5 h-5 text-[#7E8896] absolute right-4 top-1/2 -translate-y-1/2" />
             <input
               id="library-search-input"
               type="search"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               placeholder="חיפוש לפי כותרת, נושא, מקור, תוכנית לימודים או הערה…"
-              className="w-full pl-4 pr-12 py-3 rounded-2xl bg-white border border-slate-200 text-sm focus:ring-2 focus:ring-[#536BD9] text-[#17243A] shadow-inner placeholder:text-slate-400"
+              className="w-full pl-4 pr-12 py-3 rounded-xl bg-[#F2EFEB] border border-[#DDD6CB] text-sm text-[#14181F] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] placeholder:text-[#8E97A4] focus:bg-white focus:border-[#1C2024] focus:ring-1 focus:ring-[#1C2024] font-sans-hebrew transition-all"
             />
           </div>
 
-          {/* Detailed Filters Toggle Button */}
+          {/* Detailed Filters Toggle Button - Tactile Paper Button */}
           <button
             id="btn-toggle-filters"
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-            className={`px-4 py-3 rounded-2xl text-sm font-semibold border transition-all flex items-center justify-center gap-2 shrink-0 ${
+            className={`px-4 py-3 rounded-xl text-sm font-semibold border transition-all active:translate-y-px flex items-center justify-center gap-2 shrink-0 font-sans-hebrew ${
               isFilterPanelOpen || activeFiltersCount > 0
-                ? 'bg-indigo-50 border-[#536BD9] text-[#334BB8]'
-                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 shadow-xs'
+                ? 'bg-[#1C2024] text-[#F8F6F1] border-[#14181F] shadow-xs'
+                : 'bg-[#FAF8F5] hover:bg-white text-[#14181F] border-[#E2DDD3] shadow-xs'
             }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
             <span>מסננים מתקדמים</span>
             {activeFiltersCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-[#536BD9] text-white text-xs flex items-center justify-center font-bold">
+              <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold ${
+                isFilterPanelOpen ? 'bg-white text-[#1C2024]' : 'bg-[#1C2024] text-white'
+              }`}>
                 {activeFiltersCount}
               </span>
             )}
           </button>
         </div>
 
-        {/* Quick Views Bar per spec */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
-          <span className="text-slate-400 shrink-0 font-medium ml-1">תצוגה מהירה:</span>
+        {/* Quick Views Bar - Tactile Stamped Toggles */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs font-sans-hebrew">
+          <span className="text-[#7E8896] shrink-0 font-medium ml-1">תצוגה מהירה:</span>
           {[
             { id: 'all', label: 'הכול' },
             { id: 'latest_briefing', label: 'מהתדריך האחרון' },
@@ -450,47 +443,74 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   quickView: qv.id as FilterState['quickView'],
                 })
               }
-              className={`px-3 py-1.5 rounded-xl font-medium shrink-0 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl font-semibold shrink-0 transition-all active:translate-y-px ${
                 filters.quickView === qv.id
-                  ? 'bg-[#17243A] text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
+                  ? 'bg-[#1C2024] text-[#F8F6F1] shadow-xs border border-[#14181F]'
+                  : 'bg-[#FAF8F5] hover:bg-white text-[#556070] hover:text-[#14181F] border border-[#E5DFD5]'
               }`}
             >
               {qv.label}
             </button>
           ))}
         </div>
+
+        {/* Color-Coded Content Types Quick Filter Strip */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs font-sans-hebrew pt-2.5 border-t border-[#EAE5DC]">
+          <span className="text-[#7E8896] shrink-0 font-medium ml-1">סוג תוכן:</span>
+          {ALL_CONTENT_TYPES.map((ct) => {
+            const isSelected = filters.contentTypes.includes(ct.value);
+            return (
+              <button
+                key={ct.value}
+                type="button"
+                onClick={() => {
+                  const next = isSelected
+                    ? filters.contentTypes.filter((t) => t !== ct.value)
+                    : [...filters.contentTypes, ct.value];
+                  setFilters({ ...filters, contentTypes: next });
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold shrink-0 transition-all active:translate-y-px border ${
+                  isSelected ? ct.filterActiveClass : ct.filterInactiveClass
+                }`}
+                title={ct.description}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : ct.dotClass}`} aria-hidden="true" />
+                <span>{ct.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Expandable Advanced Filter Panel */}
+      {/* Expandable Advanced Filter Panel - Atelier Drawer */}
       {isFilterPanelOpen && (
-        <div className="glass-panel p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="paper-sheet p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-3 font-sans-hebrew">
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[#536BD9]" />
-              <h3 className="font-bold text-sm text-[#17243A]">סינון מותאם</h3>
+              <Filter className="w-4 h-4 text-[#1C2024]" />
+              <h3 className="font-bold text-sm text-[#14181F] font-serif-hebrew text-base">סינון מותאם</h3>
             </div>
             <button
               onClick={handleResetFilters}
-              className="text-xs text-[#536BD9] hover:underline font-semibold flex items-center gap-1"
+              className="text-xs text-[#8F4824] hover:underline font-semibold flex items-center gap-1 active:translate-y-px"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>איפוס כל המסננים</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs font-sans-hebrew">
             {/* Column 1: Dates & Content Types */}
             <div className="space-y-4">
               <div>
-                <label className="font-bold text-slate-700 block mb-1.5">סינון תאריכים:</label>
+                <label className="font-bold text-[#14181F] block mb-1.5">סינון תאריכים:</label>
                 <div className="grid grid-cols-2 gap-1.5 mb-2">
                   <select
                     value={filters.dateRange}
                     onChange={(e) =>
                       setFilters({ ...filters, dateRange: e.target.value as FilterState['dateRange'] })
                     }
-                    className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                    className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white focus:border-[#1C2024]"
                   >
                     <option value="all">כל התאריכים</option>
                     <option value="today">היום</option>
@@ -504,7 +524,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     onChange={(e) =>
                       setFilters({ ...filters, dateField: e.target.value as FilterState['dateField'] })
                     }
-                    className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                    className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white focus:border-[#1C2024]"
                   >
                     <option value="briefing_date">לפי תאריך תדריך</option>
                     <option value="created_at">לפי הוספה לספרייה</option>
@@ -519,22 +539,22 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       type="date"
                       value={filters.customDateStart || ''}
                       onChange={(e) => setFilters({ ...filters, customDateStart: e.target.value })}
-                      className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                      className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F]"
                     />
                     <input
                       type="date"
                       value={filters.customDateEnd || ''}
                       onChange={(e) => setFilters({ ...filters, customDateEnd: e.target.value })}
-                      className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                      className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F]"
                     />
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1.5">סוג תוכן:</label>
+                <label className="font-bold text-[#14181F] block mb-1.5">סוג תוכן:</label>
                 <div className="flex flex-wrap gap-1.5">
-                  {CONTENT_TYPES.map((ct) => {
+                  {ALL_CONTENT_TYPES.map((ct) => {
                     const isSelected = filters.contentTypes.includes(ct.value);
                     return (
                       <button
@@ -546,13 +566,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             : [...filters.contentTypes, ct.value];
                           setFilters({ ...filters, contentTypes: next });
                         }}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                          isSelected
-                            ? 'bg-[#536BD9] text-white'
-                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all active:translate-y-px border ${
+                          isSelected ? ct.filterActiveClass : ct.filterInactiveClass
                         }`}
+                        title={ct.description}
                       >
-                        {ct.label}
+                        <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : ct.dotClass}`} aria-hidden="true" />
+                        <span>{ct.label}</span>
                       </button>
                     );
                   })}
@@ -563,7 +583,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             {/* Column 2: Channels, Sources & Subjects */}
             <div className="space-y-4">
               <div>
-                <label className="font-bold text-slate-700 block mb-1.5">ערוצי איסוף:</label>
+                <label className="font-bold text-[#14181F] block mb-1.5">ערוצי איסוף:</label>
                 <div className="flex flex-wrap gap-1.5">
                   {CHANNELS.map((ch) => {
                     const isSelected = filters.channels.includes(ch.value);
@@ -577,10 +597,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             : [...filters.channels, ch.value];
                           setFilters({ ...filters, channels: next });
                         }}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all active:translate-y-px ${
                           isSelected
-                            ? 'bg-[#136142] text-white'
-                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                            ? 'bg-[#24523B] text-white border border-[#1B3F2D]'
+                            : 'bg-[#FAF8F5] text-[#556070] border border-[#E5DFD5] hover:bg-white hover:text-[#14181F]'
                         }`}
                       >
                         {ch.label}
@@ -592,18 +612,18 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="font-bold text-slate-700">נושאים (בחירה מרובה):</label>
-                  <label className="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
+                  <label className="font-bold text-[#14181F]">נושאים (בחירה מרובה):</label>
+                  <label className="flex items-center gap-1.5 text-[11px] text-[#556070] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.subjectMatchAll}
                       onChange={(e) => setFilters({ ...filters, subjectMatchAll: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-[#536BD9]"
+                      className="w-3.5 h-3.5 rounded text-[#1C2024] focus:ring-[#1C2024]"
                     />
                     <span>כל הנושאים שנבחרו (AND)</span>
                   </label>
                 </div>
-                <div className="max-h-28 overflow-y-auto p-2 bg-white rounded-xl border border-slate-200 flex flex-wrap gap-1">
+                <div className="max-h-28 overflow-y-auto p-2 bg-[#FAF8F5] rounded-xl border border-[#DDD6CB] flex flex-wrap gap-1">
                   {allSubjects.map((sub) => {
                     const isSelected = filters.subjects.includes(sub);
                     return (
@@ -616,10 +636,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             : [...filters.subjects, sub];
                           setFilters({ ...filters, subjects: next });
                         }}
-                        className={`px-2 py-0.5 rounded-md text-[11px] ${
+                        className={`px-2 py-0.5 rounded-md text-[11px] transition-all ${
                           isSelected
-                            ? 'bg-[#536BD9] text-white font-medium'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'bg-[#1C2024] text-white font-semibold'
+                            : 'bg-white text-[#556070] border border-[#E2DDD3] hover:bg-[#F2EFEB]'
                         }`}
                       >
                         {sub}
@@ -630,11 +650,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1.5">מקור ראשי:</label>
+                <label className="font-bold text-[#14181F] block mb-1.5">מקור ראשי:</label>
                 <select
                   value={filters.source}
                   onChange={(e) => setFilters({ ...filters, source: e.target.value })}
-                  className="w-full p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                  className="w-full p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white"
                 >
                   <option value="">כל המקורות</option>
                   {allSources.map((src) => (
@@ -649,14 +669,14 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             {/* Column 3: College Programs, Rating & Personal Status */}
             <div className="space-y-4">
               <div>
-                <label className="font-bold text-slate-700 block mb-1.5">תוכנית ורמת לימודים:</label>
+                <label className="font-bold text-[#14181F] block mb-1.5">תוכנית ורמת לימודים:</label>
                 <div className="grid grid-cols-2 gap-1.5 mb-2">
                   <select
                     value={filters.academicLevel}
                     onChange={(e) =>
                       setFilters({ ...filters, academicLevel: e.target.value as AcademicLevel | '' })
                     }
-                    className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                    className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white"
                   >
                     <option value="">כל הרמות האקדמיות</option>
                     {ACADEMIC_LEVELS.map((lvl) => (
@@ -669,7 +689,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <select
                     value={filters.program}
                     onChange={(e) => setFilters({ ...filters, program: e.target.value })}
-                    className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                    className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white"
                   >
                     <option value="">כל תוכניות הלימוד</option>
                     {allPrograms.map((prg) => (
@@ -682,7 +702,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1.5">דירוג וסטטוס אישי:</label>
+                <label className="font-bold text-[#14181F] block mb-1.5">דירוג וסטטוס אישי:</label>
                 <div className="grid grid-cols-2 gap-1.5 mb-2">
                   <select
                     value={filters.minRating === null ? '' : String(filters.minRating)}
@@ -690,7 +710,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       const v = e.target.value;
                       setFilters({ ...filters, minRating: v === '' ? null : parseInt(v, 10) });
                     }}
-                    className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                    className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white"
                   >
                     <option value="">כל הדירוגים</option>
                     <option value="5">5 כוכבים בלבד</option>
@@ -704,7 +724,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     onChange={(e) =>
                       setFilters({ ...filters, userStatus: e.target.value as UserStatus | '' })
                     }
-                    className="p-2 rounded-xl bg-white border border-slate-200 text-xs"
+                    className="p-2 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] focus:bg-white"
                   >
                     <option value="">כל הסטטוסים</option>
                     <option value="new">חדש</option>
@@ -716,22 +736,22 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 </div>
 
                 <div className="space-y-1.5 pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer font-medium text-[#2D3540]">
                     <input
                       type="checkbox"
                       checked={filters.hasPersonalNote}
                       onChange={(e) => setFilters({ ...filters, hasPersonalNote: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-[#536BD9]"
+                      className="w-3.5 h-3.5 rounded text-[#1C2024] focus:ring-[#1C2024]"
                     />
                     <span>יש הערה אישית בלבד</span>
                   </label>
 
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer font-medium text-[#2D3540]">
                     <input
                       type="checkbox"
                       checked={filters.hasProgramMatch}
                       onChange={(e) => setFilters({ ...filters, hasProgramMatch: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-[#536BD9]"
+                      className="w-3.5 h-3.5 rounded text-[#1C2024] focus:ring-[#1C2024]"
                     />
                     <span>יש התאמה לתוכנית לימודים בלבד</span>
                   </label>
@@ -744,42 +764,46 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
       {/* Active Filter Chips Bar */}
       {activeFiltersCount > 0 && (
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-slate-400 font-medium">מסננים פעילים:</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs font-sans-hebrew">
+          <span className="text-[#7E8896] font-medium">מסננים פעילים:</span>
           {filters.search && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 text-[#334BB8]">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAF8F5] text-[#14181F] border border-[#DDD6CB] shadow-2xs">
               חיפוש: "{filters.search}"
               <X
-                className="w-3.5 h-3.5 cursor-pointer"
+                className="w-3.5 h-3.5 cursor-pointer text-[#7E8896] hover:text-[#14181F]"
                 onClick={() => setFilters({ ...filters, search: '' })}
               />
             </span>
           )}
-          {filters.contentTypes.map((ct) => (
-            <span
-              key={ct}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800"
-            >
-              {ct}
-              <X
-                className="w-3.5 h-3.5 cursor-pointer"
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    contentTypes: filters.contentTypes.filter((t) => t !== ct),
-                  })
-                }
-              />
-            </span>
-          ))}
+          {filters.contentTypes.map((ct) => {
+            const meta = getContentTypeMeta(ct);
+            return (
+              <span
+                key={ct}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-2xs ${meta.badgeClass}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${meta.dotClass}`} aria-hidden="true" />
+                <span>{meta.label}</span>
+                <X
+                  className="w-3.5 h-3.5 cursor-pointer opacity-70 hover:opacity-100"
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      contentTypes: filters.contentTypes.filter((t) => t !== ct),
+                    })
+                  }
+                />
+              </span>
+            );
+          })}
           {filters.subjects.map((sub) => (
             <span
               key={sub}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAF8F5] text-[#14181F] border border-[#DDD6CB] shadow-2xs"
             >
               נושא: {sub}
               <X
-                className="w-3.5 h-3.5 cursor-pointer"
+                className="w-3.5 h-3.5 cursor-pointer text-[#7E8896] hover:text-[#14181F]"
                 onClick={() =>
                   setFilters({
                     ...filters,
@@ -790,17 +814,17 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             </span>
           ))}
           {filters.source && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAF8F5] text-[#14181F] border border-[#DDD6CB] shadow-2xs">
               מקור: {filters.source}
               <X
-                className="w-3.5 h-3.5 cursor-pointer"
+                className="w-3.5 h-3.5 cursor-pointer text-[#7E8896] hover:text-[#14181F]"
                 onClick={() => setFilters({ ...filters, source: '' })}
               />
             </span>
           )}
           <button
             onClick={handleResetFilters}
-            className="text-[#536BD9] hover:underline font-semibold pr-2"
+            className="text-[#8F4824] hover:underline font-semibold pr-2 active:translate-y-px"
           >
             איפוס הכל
           </button>
@@ -808,10 +832,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       )}
 
       {/* Sorting & Selection Bar Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 pt-2 border-b border-slate-200/80 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#556070] pt-2 border-b border-[#EAE5DC] pb-3 font-sans-hebrew">
         {/* Results Counter & Selection options */}
-        <div className="flex items-center gap-4">
-          <span className="font-bold text-[#17243A] text-sm">
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="font-bold text-[#14181F] font-serif-hebrew text-base">
             נמצאו {sortedItems.length} פריטים מתוך {items.length}
           </span>
 
@@ -820,12 +844,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectAllVisible(visibleIds)}
-                className="text-[#536BD9] hover:underline font-medium flex items-center gap-1"
+                className="text-[#14181F] hover:text-[#8F4824] font-medium flex items-center gap-1.5 transition-colors"
               >
                 {areAllVisibleSelected ? (
-                  <CheckSquare className="w-3.5 h-3.5" />
+                  <CheckSquare className="w-4 h-4 text-[#1C2024]" />
                 ) : (
-                  <Square className="w-3.5 h-3.5" />
+                  <Square className="w-4 h-4 text-[#8E97A4]" />
                 )}
                 <span>בחירת עמוד זה ({visibleIds.length})</span>
               </button>
@@ -833,7 +857,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectAllResults(allResultIds)}
-                className="text-[#536BD9] hover:underline font-medium"
+                className="text-[#8F4824] hover:underline font-medium"
               >
                 בחירת כל {sortedItems.length} התוצאות
               </button>
@@ -843,11 +867,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
         {/* Sorting Dropdown & Asc/Desc */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">מיון לפי:</span>
+          <span className="text-[#7E8896]">מיון לפי:</span>
           <select
             value={sortField}
             onChange={(e) => setSortField(e.target.value as SortField)}
-            className="p-1.5 rounded-lg bg-white border border-slate-200 text-xs text-[#17243A] font-medium"
+            className="p-1.5 rounded-lg bg-[#FAF8F5] border border-[#DDD6CB] text-xs text-[#14181F] font-semibold hover:bg-white focus:bg-white"
           >
             <option value="briefing_date">תאריך תדריך</option>
             <option value="created_at">תאריך הוספה לספרייה</option>
@@ -861,10 +885,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-1 font-medium"
+            className="p-1.5 rounded-lg bg-[#FAF8F5] border border-[#DDD6CB] text-[#14181F] hover:bg-white flex items-center gap-1 font-semibold active:translate-y-px"
             title={`סדר ${sortOrder === 'asc' ? 'עולה' : 'יורד'}`}
           >
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#536BD9]" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#556070]" />
             <span>{sortOrder === 'asc' ? 'עולה' : 'יורד'}</span>
           </button>
         </div>
@@ -873,38 +897,48 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       {/* Main Content Area */}
       {items.length === 0 ? (
         /* Empty State (Initial application state per Section 13) */
-        <div className="p-12 sm:p-16 text-center glass-panel max-w-2xl mx-auto my-8 space-y-4">
-          <div className="w-16 h-16 rounded-3xl bg-[#DDE4FF] text-[#334BB8] flex items-center justify-center mx-auto shadow-sm">
+        <div className="p-12 sm:p-16 text-center paper-sheet max-w-2xl mx-auto my-8 space-y-5 border border-[#DDD6CB] shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-[#F0EDE6] border border-[#DDD6CB] text-[#14181F] flex items-center justify-center mx-auto shadow-inner">
             <BookOpen className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-[#17243A]">
+          <h2 className="text-2xl font-bold font-serif-hebrew text-[#14181F]">
             כאן תיבנה ספריית ההשראה שלך
           </h2>
-          <p className="text-sm text-[#4A5568] max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-[#556070] font-sans-hebrew max-w-md mx-auto leading-relaxed">
             הדביקו תדריך ראשון כדי להתחיל. סוכן המחקר יפיק ממצאים, סדנאות, כלים והתאמות לתוכניות הלימוד בסמינר הקיבוצים.
           </p>
-          <div className="pt-2">
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
             <button
               id="empty-state-btn-import"
               onClick={onOpenImport}
-              className="px-6 py-3 rounded-2xl text-sm font-bold bg-[#536BD9] hover:bg-[#4357c2] text-white shadow-md transition-all flex items-center gap-2 mx-auto"
+              className="px-6 py-3 rounded-xl text-sm font-bold bg-[#1C2024] hover:bg-[#2D3540] text-white shadow-xs transition-all active:translate-y-px flex items-center gap-2 font-sans-hebrew"
             >
               <UploadCloud className="w-4 h-4" />
               <span>ייבוא תדריך</span>
             </button>
+            {onOpenReset && (
+              <button
+                id="empty-state-btn-reset"
+                onClick={onOpenReset}
+                className="px-5 py-3 rounded-xl text-sm font-semibold bg-[#FAF8F5] hover:bg-white text-[#14181F] border border-[#DDD6CB] shadow-2xs transition-all active:translate-y-px flex items-center gap-2 font-sans-hebrew"
+              >
+                <Sparkles className="w-4 h-4 text-[#8F4824]" />
+                <span>איפוס וטעינת תדריך דוגמה</span>
+              </button>
+            )}
           </div>
         </div>
       ) : sortedItems.length === 0 ? (
         /* No Search Results */
-        <div className="p-12 text-center glass-panel">
-          <Filter className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-[#17243A] mb-1">לא נמצאו פריטים תואמים</h3>
-          <p className="text-xs text-slate-500 mb-4">
+        <div className="p-12 text-center paper-sheet border border-[#DDD6CB]">
+          <Filter className="w-10 h-10 text-[#8E97A4] mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-serif-hebrew text-[#14181F] mb-1">לא נמצאו פריטים תואמים</h3>
+          <p className="text-xs text-[#556070] font-sans-hebrew mb-4">
             נסו לשנות את מונח החיפוש או לאפס חלק מהמסננים הפעילים.
           </p>
           <button
             onClick={handleResetFilters}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-white text-[#536BD9] border border-slate-200 hover:bg-slate-50"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#FAF8F5] text-[#14181F] border border-[#DDD6CB] hover:bg-white active:translate-y-px font-sans-hebrew"
           >
             איפוס כל המסננים
           </button>
@@ -928,8 +962,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-6 border-t border-slate-200 text-xs">
-              <span className="text-slate-500">
+            <div className="flex items-center justify-between pt-6 border-t border-[#EAE5DC] text-xs font-sans-hebrew">
+              <span className="text-[#7E8896]">
                 מציג פריטים {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
                 {Math.min(currentPage * ITEMS_PER_PAGE, sortedItems.length)} מתוך {sortedItems.length}
               </span>
@@ -938,7 +972,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-xl border border-[#DDD6CB] bg-[#FAF8F5] text-[#14181F] hover:bg-white disabled:opacity-40 transition-all active:translate-y-px font-semibold"
                 >
                   הקודם
                 </button>
@@ -947,10 +981,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <button
                     key={pg}
                     onClick={() => setCurrentPage(pg)}
-                    className={`w-8 h-8 rounded-xl font-medium ${
+                    className={`w-8 h-8 rounded-xl font-medium transition-all active:translate-y-px ${
                       currentPage === pg
-                        ? 'bg-[#536BD9] text-white font-bold'
-                        : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
+                        ? 'bg-[#1C2024] text-white font-bold border border-[#14181F] shadow-xs'
+                        : 'bg-[#FAF8F5] text-[#556070] hover:bg-white hover:text-[#14181F] border border-[#E5DFD5]'
                     }`}
                   >
                     {pg}
@@ -960,7 +994,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-xl border border-[#DDD6CB] bg-[#FAF8F5] text-[#14181F] hover:bg-white disabled:opacity-40 transition-all active:translate-y-px font-semibold"
                 >
                   הבא
                 </button>

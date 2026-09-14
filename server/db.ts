@@ -18,6 +18,7 @@ import { SAMPLE_BRIEFING } from '../src/data/sample-briefing.ts';
 
 interface DatabaseSchema {
   version: 1;
+  cleared_by_user?: boolean;
   items: Record<string, LibraryItem>;
   briefings: Record<string, BriefingRecord>;
   import_logs: ImportLogRecord[];
@@ -60,8 +61,8 @@ class DatabaseStore {
         this.save();
       }
 
-      // If database is brand new and empty, seed with initial sample briefing
-      if (Object.keys(this.data.items).length === 0) {
+      // If database is brand new and empty (and not deliberately cleared by user), seed with initial sample briefing
+      if (Object.keys(this.data.items).length === 0 && !this.data.cleared_by_user) {
         this.importBriefing(
           SAMPLE_BRIEFING,
           SAMPLE_BRIEFING.items.map((_, i) => i),
@@ -418,6 +419,47 @@ class DatabaseStore {
         mode === 'replace'
           ? `המאגר הוחלף בהצלחה: שוחזרו ${restoredItems} פריטים ו־${restoredBriefings} תדריכים.`
           : `מיזוג הושלם בהצלחה: נוספו/עודכנו ${restoredItems} פריטים ו־${restoredBriefings} תדריכים.`,
+    };
+  }
+
+  public clearDatabase(reseedSample: boolean = false): {
+    success: boolean;
+    deleted_items_count: number;
+    deleted_briefings_count: number;
+    reseeded: boolean;
+    message: string;
+  } {
+    const prevItemCount = Object.keys(this.data.items).length;
+    const prevBriefingCount = Object.keys(this.data.briefings).length;
+
+    this.data.items = {};
+    this.data.briefings = {};
+    this.data.import_logs = [];
+    this.data.item_briefing_links = [];
+
+    let reseeded = false;
+    if (reseedSample) {
+      this.data.cleared_by_user = false;
+      this.importBriefing(
+        SAMPLE_BRIEFING,
+        SAMPLE_BRIEFING.items.map((_, i) => i),
+        true
+      );
+      reseeded = true;
+    } else {
+      this.data.cleared_by_user = true;
+    }
+
+    this.save();
+
+    return {
+      success: true,
+      deleted_items_count: prevItemCount,
+      deleted_briefings_count: prevBriefingCount,
+      reseeded,
+      message: reseeded
+        ? `המאגר אופס ונטען מחדש עם תדריך הדוגמה (${SAMPLE_BRIEFING.items.length} פריטים).`
+        : `כל נתוני המאגר נמחקו בהצלחה (${prevItemCount} פריטים, ${prevBriefingCount} תדריכים). המאגר כעת ריק לחלוטין.`,
     };
   }
 }

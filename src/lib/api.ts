@@ -141,3 +141,23 @@ export async function restoreBackup(
   }
   return res.json();
 }
+
+export async function resetDatabase(reseed: boolean = false): Promise<{
+  success: boolean;
+  deleted_items_count: number;
+  deleted_briefings_count: number;
+  reseeded: boolean;
+  message: string;
+}> {
+  const res = await fetch('/api/database/reset', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reseed }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'שגיאה באיפוס המאגר');
+  }
+  return res.json();
+}
+

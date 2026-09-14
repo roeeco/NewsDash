@@ -23,6 +23,7 @@ import { BackupExportView } from './components/BackupExportView.tsx';
 import { ItemDetailModal } from './components/ItemDetailModal.tsx';
 import { FloatingSelectionBar } from './components/FloatingSelectionBar.tsx';
 import { PdfExportModal } from './components/PdfExportModal.tsx';
+import { ResetDatabaseModal } from './components/ResetDatabaseModal.tsx';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function App() {
@@ -33,7 +34,6 @@ export default function App() {
   const [importLogs, setImportLogs] = useState<ImportLogRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reducedTransparency, setReducedTransparency] = useState(false);
 
   // Selection state
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
@@ -43,6 +43,7 @@ export default function App() {
   // Modals
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<LibraryItem | null>(null);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // Load all data
   const loadData = useCallback(async () => {
@@ -189,9 +190,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col selection:bg-[#536BD9] selection:text-white ${
-        reducedTransparency ? 'reduced-transparency bg-[#EAEDF5]' : 'bg-[#F4F6FB]'
-      }`}
+      className="min-h-screen flex flex-col selection:bg-[#1C2024] selection:text-[#F8F6F1] font-sans-hebrew bg-[#F8F6F1]"
       dir="rtl"
     >
       {/* Global Header */}
@@ -202,8 +201,6 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         stats={stats}
-        reducedTransparency={reducedTransparency}
-        onToggleReducedTransparency={() => setReducedTransparency((prev) => !prev)}
         onOpenImport={() => {
           setCurrentTab('import');
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -212,22 +209,23 @@ export default function App() {
           setCurrentTab('backup');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onOpenReset={() => setIsResetModalOpen(true)}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 pb-24">
+      <main className="flex-1 pb-28">
         {loading && items.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
-            <RefreshCw className="w-8 h-8 text-[#536BD9] animate-spin" />
-            <p className="text-sm font-semibold text-slate-600">טוען את ספריית ההשראה...</p>
+            <RefreshCw className="w-7 h-7 text-[#1C2024] animate-spin" />
+            <p className="text-sm font-medium text-[#556070]">טוען את ספריית ההשראה מתוך הארכיון...</p>
           </div>
         ) : error ? (
-          <div className="max-w-md mx-auto my-12 p-6 glass-panel text-center space-y-3">
-            <AlertCircle className="w-8 h-8 text-red-500 mx-auto" />
-            <p className="text-sm font-bold text-slate-800">{error}</p>
+          <div className="max-w-md mx-auto my-12 p-8 paper-sheet text-center space-y-4">
+            <AlertCircle className="w-8 h-8 text-[#B85D38] mx-auto" />
+            <p className="text-base font-bold font-serif-hebrew text-[#14181F]">{error}</p>
             <button
               onClick={loadData}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#536BD9] text-white"
+              className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-[#1C2024] hover:bg-[#2D3540] active:translate-y-px text-white shadow-xs transition-all"
             >
               נסה שוב
             </button>
@@ -246,6 +244,7 @@ export default function App() {
                 onUpdateRating={handleUpdateRating}
                 onUpdateStatus={handleUpdateStatus}
                 onOpenImport={() => setCurrentTab('import')}
+                onOpenReset={() => setIsResetModalOpen(true)}
                 onFilteredItemsChange={setFilteredItems}
                 latestBriefingId={stats?.latest_briefing_id || null}
               />
@@ -274,6 +273,7 @@ export default function App() {
                 selectedItemIds={selectedItemIds}
                 filteredItems={filteredItems}
                 onDataRestored={loadData}
+                onOpenResetModal={() => setIsResetModalOpen(true)}
               />
             )}
           </>
@@ -313,6 +313,20 @@ export default function App() {
           }}
         />
       )}
+
+      {/* Reset & Clear Database Modal */}
+      <ResetDatabaseModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onSuccess={() => {
+          setSelectedItemIds(new Set());
+          setFilteredItems([]);
+          loadData();
+        }}
+        totalItems={items.length}
+        totalBriefings={briefings.length}
+        totalLogs={importLogs.length}
+      />
     </div>
   );
 }

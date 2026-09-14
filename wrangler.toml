@@ -1,0 +1,12 @@
+name = "inspiration-library"
+main = "server.ts"
+compatibility_date = "2024-09-01"
+
+# Cloudflare D1 Database Binding
+# Replace database_name and database_id with your values from:
+#   npx wrangler d1 create inspiration-db
+[[d1_databases]]
+binding = "DB"
+database_name = "inspiration-db"
+database_id = "your-d1-database-id-here"
+migrations_dir = "./migrations"

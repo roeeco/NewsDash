@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { LibraryItem, UserStatus } from '../types.ts';
 import { formatDateHebrew } from '../lib/dateUtils.ts';
+import { getContentTypeMeta } from '../lib/contentTypes.ts';
 
 interface ItemDetailModalProps {
   item: LibraryItem | null;
@@ -152,26 +153,28 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
   };
 
   const noveltyInfo = NOVELTY_LABELS[item.novelty] || { label: item.novelty, desc: '' };
+  const typeMeta = getContentTypeMeta(item.content_type);
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 overflow-y-auto bg-[#17243A]/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+      className="fixed inset-0 z-50 overflow-y-auto bg-[#14181F]/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 font-sans-hebrew"
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-4xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#DDD6CB] overflow-hidden my-6 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Sticky Modal Header */}
-        <div className="sticky top-0 z-20 px-6 py-4 bg-white/95 border-b border-slate-200 backdrop-blur-md flex items-center justify-between gap-4">
+        <div className="sticky top-0 z-20 px-6 py-4 bg-[#FAF8F5]/95 border-b border-[#EAE5DC] backdrop-blur-md flex items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#DDE4FF] text-[#334BB8]">
-              {CONTENT_TYPE_LABELS[item.content_type] || item.content_type}
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border shadow-2xs ${typeMeta.badgeClass}`}>
+              <span className={`w-2 h-2 rounded-full ${typeMeta.dotClass}`} aria-hidden="true" />
+              {typeMeta.label}
             </span>
             <span
-              className="px-2.5 py-1 rounded-xl text-xs font-medium bg-[#DCF2E9] text-[#136142]"
+              className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#24523B]/10 text-[#24523B] border border-[#24523B]/20"
               title={noveltyInfo.desc}
             >
               {noveltyInfo.label}
@@ -180,7 +183,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
               item.channels.map((ch) => (
                 <span
                   key={ch}
-                  className="px-2.5 py-1 rounded-xl text-xs font-medium bg-slate-100 text-slate-700"
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#F0EDE6] text-[#556070] border border-[#DDD6CB]"
                 >
                   {CHANNEL_LABELS[ch] || ch}
                 </span>
@@ -190,7 +193,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
           <button
             id="modal-btn-close"
             onClick={onClose}
-            className="p-2 rounded-2xl text-slate-500 hover:text-[#17243A] hover:bg-slate-100 transition-colors focus:ring-2 focus:ring-[#536BD9]"
+            className="p-2 rounded-xl text-[#7E8896] hover:text-[#14181F] hover:bg-[#EAE5DC] transition-colors border border-transparent hover:border-[#DDD6CB]"
             aria-label="סגור חלונית (Escape)"
           >
             <X className="w-5 h-5" />
@@ -198,13 +201,13 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-[#17243A]">
+        <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-[#14181F]">
           {/* Title & Edit mode */}
           <div>
             {isEditingContent ? (
-              <div className="space-y-3 p-4 rounded-2xl bg-amber-50/50 border border-amber-200">
+              <div className="space-y-3 p-4 rounded-xl bg-[#FDF9F0] border border-[#E8DCC4]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-amber-900">
+                  <span className="text-xs font-semibold text-[#8F4824]">
                     עריכת תוכן ידנית (עריכה זו תישמר ולא תידרס בייבוא עתידי)
                   </span>
                 </div>
@@ -212,18 +215,18 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full text-xl font-bold p-3 rounded-xl border border-slate-300 focus:ring-[#536BD9]"
+                  className="w-full text-xl font-bold font-serif-hebrew p-3 rounded-xl border border-[#DDD6CB] bg-white text-[#14181F] focus:border-[#1C2024]"
                   placeholder="כותרת הפריט"
                 />
               </div>
             ) : (
               <div className="flex items-start justify-between gap-4">
-                <h1 id="modal-title" className="text-2xl sm:text-3xl font-bold leading-tight text-[#17243A]">
+                <h1 id="modal-title" className="text-2xl sm:text-3xl font-bold font-serif-hebrew leading-snug text-[#14181F]">
                   {item.title}
                 </h1>
                 <button
                   onClick={() => setIsEditingContent(true)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-[#536BD9] hover:bg-slate-50 transition-colors shrink-0"
+                  className="p-2 rounded-xl text-[#7E8896] hover:text-[#14181F] hover:bg-[#F0EDE6] border border-transparent hover:border-[#DDD6CB] transition-colors shrink-0 active:translate-y-px"
                   title="ערוך תוכן ידנית"
                 >
                   <Edit3 className="w-4 h-4" />
@@ -232,22 +235,22 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
             )}
 
             {/* Metadata bar: Dates & Source */}
-            <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[#4A5568]">
+            <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[#556070]">
               <div className="flex items-center gap-1.5 font-medium">
                 <span>מקור:</span>
-                <span className="text-[#17243A] font-semibold">{item.source_name}</span>
+                <span className="text-[#14181F] font-bold">{item.source_name}</span>
               </div>
 
               {item.published_date && (
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#536BD9]" />
+                  <Calendar className="w-4 h-4 text-[#7E8896]" />
                   <span>פורסם: {formatDateHebrew(item.published_date)}</span>
                 </div>
               )}
 
               {item.event_date && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#EEF2FF] text-[#334BB8] font-semibold">
-                  <Calendar className="w-4 h-4" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F0EDE6] border border-[#DDD6CB] text-[#14181F] font-semibold">
+                  <Calendar className="w-4 h-4 text-[#8F4824]" />
                   <span>מועד אירוע: {formatDateHebrew(item.event_date)}</span>
                 </div>
               )}
@@ -255,13 +258,13 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
           </div>
 
           {/* Primary Action Buttons: Open source & Copy URL */}
-          <div className="flex flex-wrap items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl bg-[#F2EFEB] border border-[#DDD6CB]">
             <a
               id="modal-open-source"
               href={item.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#536BD9] text-white hover:bg-[#4357c2] shadow-sm transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-[#1C2024] text-white hover:bg-[#2D3540] border border-[#14181F] shadow-xs transition-all active:translate-y-px"
             >
               <span>מעבר למקור המלא ({item.source_name})</span>
               <ExternalLink className="w-4 h-4" />
@@ -269,29 +272,29 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
             <button
               onClick={() => handleCopyUrl(item.source_url)}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-white hover:bg-slate-100 text-[#17243A] border border-slate-300 transition-colors"
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-[#FAF8F5] hover:bg-white text-[#14181F] border border-[#DDD6CB] shadow-2xs transition-all active:translate-y-px"
             >
               {copiedUrl ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  <span className="text-emerald-700">הכתובת הועתקה!</span>
+                  <Check className="w-4 h-4 text-[#24523B]" />
+                  <span className="text-[#24523B] font-bold">הכתובת הועתקה!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4 text-slate-500" />
+                  <Copy className="w-4 h-4 text-[#7E8896]" />
                   <span>העתקת כתובת מקור</span>
                 </>
               )}
             </button>
 
-            <span className="text-xs text-slate-400 mr-auto font-mono truncate max-w-xs" dir="ltr">
+            <span className="text-xs text-[#7E8896] mr-auto font-mono truncate max-w-xs" dir="ltr">
               {item.source_url}
             </span>
           </div>
 
           {/* Image if available */}
           {item.image && !imageError && (
-            <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
+            <div className="rounded-xl overflow-hidden border border-[#DDD6CB] bg-[#F2EFEB]">
               <img
                 src={item.image.url}
                 alt={item.image.alt || item.title}
@@ -300,14 +303,14 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 className="w-full max-h-80 object-cover"
               />
               {item.image.usage_note && (
-                <div className="p-3 bg-white/90 text-xs text-slate-600 border-t border-slate-100 flex items-center justify-between">
+                <div className="p-3 bg-[#FAF8F5]/90 text-xs text-[#556070] border-t border-[#EAE5DC] flex items-center justify-between">
                   <span>{item.image.usage_note}</span>
                   {item.image.source_url && (
                     <a
                       href={item.image.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#536BD9] underline"
+                      className="text-[#8F4824] underline font-medium"
                     >
                       מקור התמונה
                     </a>
@@ -317,12 +320,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
             </div>
           )}
 
-          {/* Caveat Banner (Never hidden if present) */}
+          {/* Caveat Banner - Marginal note in ochre */}
           {item.caveat && (
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-[#FDF9F0] border-r-4 border-r-[#B45309] border border-[#F1E5CB] text-[#78350F] flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-[#B45309] shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-bold text-sm mb-0.5">הסתייגות ושימת לב:</h3>
+                <h3 className="font-bold text-sm mb-0.5 font-serif-hebrew">הסתייגות ושימת לב:</h3>
                 <p className="text-sm leading-relaxed">{item.caveat}</p>
               </div>
             </div>
@@ -331,7 +334,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
           {/* Summary & Relevance */}
           <div className="space-y-4">
             <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7E8896] mb-2 font-serif-hebrew text-sm">
                 תקציר
               </h2>
               {isEditingContent ? (
@@ -339,17 +342,17 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                   value={editSummary}
                   onChange={(e) => setEditSummary(e.target.value)}
                   rows={4}
-                  className="w-full p-3 rounded-xl border border-slate-300 focus:ring-[#536BD9] text-base leading-relaxed"
+                  className="w-full p-3 rounded-xl border border-[#DDD6CB] bg-white text-base leading-relaxed text-[#14181F]"
                 />
               ) : (
-                <p className="text-base sm:text-lg leading-relaxed text-[#17243A] bg-[#F8FAFC] p-4 rounded-2xl border border-slate-200/70">
+                <p className="text-base sm:text-lg leading-relaxed text-[#14181F] font-serif-hebrew bg-[#F2EFEB] p-5 rounded-xl border border-[#DDD6CB] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
                   {item.summary}
                 </p>
               )}
             </div>
 
             <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7E8896] mb-2 font-serif-hebrew text-sm">
                 למה זה מעניין / רלוונטיות
               </h2>
               {isEditingContent ? (
@@ -357,10 +360,10 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                   value={editRelevance}
                   onChange={(e) => setEditRelevance(e.target.value)}
                   rows={3}
-                  className="w-full p-3 rounded-xl border border-slate-300 focus:ring-[#536BD9] text-base leading-relaxed"
+                  className="w-full p-3 rounded-xl border border-[#DDD6CB] bg-white text-base leading-relaxed text-[#14181F]"
                 />
               ) : (
-                <p className="text-base leading-relaxed text-[#17243A] bg-[#F8FAFC] p-4 rounded-2xl border border-slate-200/70">
+                <p className="text-base leading-relaxed text-[#14181F] bg-[#FAF8F5] p-4 rounded-xl border border-[#DDD6CB]">
                   {item.relevance}
                 </p>
               )}
@@ -371,14 +374,14 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 <button
                   onClick={handleSaveManualContent}
                   disabled={isSavingContent}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#536BD9] text-white hover:bg-[#4357c2] flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-[#1C2024] text-white hover:bg-[#2D3540] flex items-center gap-2 border border-[#14181F] shadow-xs active:translate-y-px"
                 >
                   <Save className="w-4 h-4" />
                   <span>שמור שינויים</span>
                 </button>
                 <button
                   onClick={() => setIsEditingContent(false)}
-                  className="px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  className="px-4 py-2 rounded-xl text-sm font-medium bg-[#FAF8F5] text-[#556070] hover:bg-white border border-[#DDD6CB]"
                 >
                   ביטול
                 </button>
@@ -389,16 +392,16 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
           {/* Subjects */}
           {item.subjects && item.subjects.length > 0 && (
             <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7E8896] mb-2 font-serif-hebrew text-sm">
                 נושאים ותגיות
               </h2>
               <div className="flex flex-wrap gap-2">
                 {item.subjects.map((sub) => (
                   <span
                     key={sub}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium bg-white border border-slate-200 text-[#17243A] shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-[#FAF8F5] border border-[#DDD6CB] text-[#14181F] shadow-2xs"
                   >
-                    <Tag className="w-3.5 h-3.5 text-[#536BD9]" />
+                    <Tag className="w-3.5 h-3.5 text-[#7E8896]" />
                     {sub}
                   </span>
                 ))}
@@ -408,54 +411,54 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
           {/* Experiential Details (Details Section - Hide empty fields!) */}
           {item.details && (
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
-              <h2 className="text-base font-bold text-[#17243A] flex items-center gap-2 border-b pb-2">
-                <BookOpen className="w-4 h-4 text-[#536BD9]" />
+            <div className="p-5 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] shadow-2xs space-y-4">
+              <h2 className="text-base font-bold font-serif-hebrew text-[#14181F] flex items-center gap-2 border-b border-[#EAE5DC] pb-2">
+                <BookOpen className="w-4 h-4 text-[#8F4824]" />
                 <span>פרטי התנסות ופדגוגיה</span>
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 {item.details.audience && (
                   <div>
-                    <span className="font-semibold text-slate-500 block text-xs">קהל יעד:</span>
-                    <p className="mt-0.5 text-[#17243A]">{item.details.audience}</p>
+                    <span className="font-semibold text-[#7E8896] block text-xs">קהל יעד:</span>
+                    <p className="mt-0.5 text-[#14181F] font-medium">{item.details.audience}</p>
                   </div>
                 )}
 
                 {item.details.participant_actions && (
                   <div>
-                    <span className="font-semibold text-slate-500 block text-xs">מה המשתתפים עושים:</span>
-                    <p className="mt-0.5 text-[#17243A]">{item.details.participant_actions}</p>
+                    <span className="font-semibold text-[#7E8896] block text-xs">מה המשתתפים עושים:</span>
+                    <p className="mt-0.5 text-[#14181F] font-medium">{item.details.participant_actions}</p>
                   </div>
                 )}
 
                 {item.details.pedagogical_rationale && (
                   <div className="md:col-span-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-500 text-xs">היגיון פדגוגי:</span>
+                      <span className="font-semibold text-[#7E8896] text-xs">היגיון פדגוגי:</span>
                       {item.details.rationale_basis && (
-                        <span className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-indigo-50 text-[#536BD9]">
+                        <span className="text-[11px] px-2 py-0.5 rounded-md font-semibold bg-[#F0EDE6] text-[#556070] border border-[#DDD6CB]">
                           {item.details.rationale_basis === 'inferred'
                             ? 'פרשנות על בסיס המקור'
                             : 'מופיע בתיאור המקור'}
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-[#17243A]">{item.details.pedagogical_rationale}</p>
+                    <p className="mt-1 text-[#14181F]">{item.details.pedagogical_rationale}</p>
                   </div>
                 )}
 
                 {item.details.practical_takeaway && (
                   <div className="md:col-span-2">
-                    <span className="font-semibold text-slate-500 block text-xs">מה אפשר ללמוד / לקחת:</span>
-                    <p className="mt-0.5 text-[#17243A]">{item.details.practical_takeaway}</p>
+                    <span className="font-semibold text-[#7E8896] block text-xs">מה אפשר ללמוד / לקחת:</span>
+                    <p className="mt-0.5 text-[#14181F]">{item.details.practical_takeaway}</p>
                   </div>
                 )}
 
                 {item.details.access_notes && (
                   <div className="md:col-span-2">
-                    <span className="font-semibold text-slate-500 block text-xs">הערות גישה ועלויות:</span>
-                    <p className="mt-0.5 text-[#17243A]">{item.details.access_notes}</p>
+                    <span className="font-semibold text-[#7E8896] block text-xs">הערות גישה ועלויות:</span>
+                    <p className="mt-0.5 text-[#14181F]">{item.details.access_notes}</p>
                   </div>
                 )}
               </div>
@@ -464,13 +467,13 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
           {/* College Program Matches Section */}
           {item.program_matches && item.program_matches.length > 0 && (
-            <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#DDE4FF] space-y-4">
+            <div className="p-5 rounded-xl bg-[#F4F0E8] border border-[#DDD6CB] space-y-4">
               <div>
-                <h2 className="text-base font-bold text-[#17243A] flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-[#536BD9]" />
+                <h2 className="text-base font-bold font-serif-hebrew text-[#14181F] flex items-center gap-2">
+                  <GraduationCap className="w-5 h-5 text-[#8F4824]" />
                   <span>התאמה לתוכניות הלימוד</span>
                 </h2>
-                <p className="text-xs text-[#526078] mt-0.5">
+                <p className="text-xs text-[#556070] mt-0.5">
                   התאמה מוצעת על בסיס המקורות — לא המלצה רשמית של המכללה
                 </p>
               </div>
@@ -479,12 +482,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 {item.program_matches.map((match, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2"
+                    className="p-4 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] shadow-2xs space-y-2"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[#17243A]">{match.name}</span>
-                        <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800">
+                        <span className="font-bold text-[#14181F] font-serif-hebrew">{match.name}</span>
+                        <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-[#24523B]/10 text-[#24523B] border border-[#24523B]/20">
                           {match.level}
                         </span>
                       </div>
@@ -492,20 +495,20 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                         href={match.program_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-[#536BD9] hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#8F4824] hover:underline"
                       >
                         <span>דף תוכנית בסמינר</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
 
-                    <p className="text-sm text-slate-700">
-                      <strong className="text-slate-900">נימוק התאמה: </strong>
+                    <p className="text-sm text-[#2D3540]">
+                      <strong className="text-[#14181F]">נימוק התאמה: </strong>
                       {match.reason}
                     </p>
 
-                    <div className="p-2.5 rounded-lg bg-indigo-50/70 text-xs text-[#334BB8]">
-                      <strong>רעיון לסדנה / יישום: </strong>
+                    <div className="p-2.5 rounded-lg bg-[#F0EDE6] border border-[#DDD6CB] text-xs text-[#14181F]">
+                      <strong className="text-[#8F4824]">רעיון לסדנה / יישום: </strong>
                       {match.workshop_idea}
                     </div>
                   </div>
@@ -516,24 +519,24 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
           {/* Program Change (if program update) */}
           {item.program_change && (
-            <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-2">
-              <h3 className="font-bold text-sm text-amber-900">עדכון בתוכנית לימודים:</h3>
+            <div className="p-4 rounded-xl bg-[#FDF9F0] border border-[#E8DCC4] space-y-2">
+              <h3 className="font-bold text-sm text-[#8F4824] font-serif-hebrew">עדכון בתוכנית לימודים:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                 <div>
-                  <span className="font-semibold block text-slate-500">סוג שינוי:</span>
-                  <span>{item.program_change.kind}</span>
+                  <span className="font-semibold block text-[#7E8896]">סוג שינוי:</span>
+                  <span className="text-[#14181F]">{item.program_change.kind}</span>
                 </div>
                 <div>
-                  <span className="font-semibold block text-slate-500">מצב קודם:</span>
-                  <span>{item.program_change.previous}</span>
+                  <span className="font-semibold block text-[#7E8896]">מצב קודם:</span>
+                  <span className="text-[#14181F]">{item.program_change.previous}</span>
                 </div>
                 <div>
-                  <span className="font-semibold block text-slate-500">מצב נוכחי:</span>
-                  <span>{item.program_change.current}</span>
+                  <span className="font-semibold block text-[#7E8896]">מצב נוכחי:</span>
+                  <span className="text-[#14181F]">{item.program_change.current}</span>
                 </div>
                 <div className="sm:col-span-3">
-                  <span className="font-semibold block text-slate-500">בסיס ההשוואה:</span>
-                  <span>{item.program_change.comparison_basis}</span>
+                  <span className="font-semibold block text-[#7E8896]">בסיס ההשוואה:</span>
+                  <span className="text-[#14181F]">{item.program_change.comparison_basis}</span>
                 </div>
               </div>
             </div>
@@ -541,22 +544,22 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
           {/* Citations & Sources list */}
           {item.sources && item.sources.length > 0 && (
-            <div className="space-y-2 pt-2 border-t border-slate-200">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="space-y-2 pt-2 border-t border-[#EAE5DC]">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7E8896] font-serif-hebrew text-sm">
                 אסמכתאות ומקורות תומכים
               </h2>
               <ul className="space-y-2">
                 {item.sources.map((s, idx) => (
                   <li
                     key={idx}
-                    className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                    className="p-3 rounded-xl bg-[#F2EFEB] border border-[#DDD6CB] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
                   >
-                    <span className="text-[#17243A] font-medium">{s.supports}</span>
+                    <span className="text-[#14181F] font-medium">{s.supports}</span>
                     <a
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[#536BD9] hover:underline shrink-0"
+                      className="inline-flex items-center gap-1 text-[#8F4824] hover:underline shrink-0 font-medium"
                       dir="ltr"
                     >
                       <span className="truncate max-w-xs">{s.url}</span>
@@ -569,16 +572,16 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
           )}
 
           {/* Personal User Section: Rating, Status, Personal Note (Stored separately) */}
-          <div className="p-5 rounded-2xl bg-[#EEF2FF]/60 border border-[#DDE4FF] space-y-4">
-            <h2 className="text-base font-bold text-[#17243A] flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-500 fill-amber-400" />
+          <div className="p-5 rounded-xl bg-[#F2EFEB] border border-[#DDD6CB] space-y-4">
+            <h2 className="text-base font-bold font-serif-hebrew text-[#14181F] flex items-center gap-2">
+              <Star className="w-5 h-5 text-[#D97706] fill-[#D97706]" />
               <span>המנהל האישי שלך — דירוג, סטטוס והערות</span>
             </h2>
 
             <div className="flex flex-wrap items-center justify-between gap-4">
               {/* Star Rating */}
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-700">דירוג:</span>
+                <span className="text-sm font-semibold text-[#556070]">דירוג:</span>
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -595,8 +598,8 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                       <Star
                         className={`w-5 h-5 ${
                           currentRating && star <= currentRating
-                            ? 'text-amber-400 fill-amber-400'
-                            : 'text-slate-300 hover:text-amber-300'
+                            ? 'text-[#D97706] fill-[#D97706]'
+                            : 'text-[#DDD6CB] hover:text-[#D97706]'
                         }`}
                       />
                     </button>
@@ -604,7 +607,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                   {currentRating && (
                     <button
                       onClick={() => onUpdateRating(item.id, null)}
-                      className="text-xs text-slate-500 hover:text-slate-800 underline mr-2"
+                      className="text-xs text-[#7E8896] hover:text-[#14181F] underline mr-2"
                     >
                       הסרת דירוג
                     </button>
@@ -614,11 +617,11 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
               {/* Status Picker */}
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-700">סטטוס:</span>
+                <span className="text-sm font-semibold text-[#556070]">סטטוס:</span>
                 <select
                   value={currentStatus}
                   onChange={(e) => onUpdateStatus(item.id, e.target.value as UserStatus)}
-                  className="text-sm font-medium py-1.5 px-3 rounded-xl border border-slate-300 bg-white text-[#17243A]"
+                  className="text-sm font-semibold py-1.5 px-3 rounded-xl border border-[#DDD6CB] bg-[#FAF8F5] text-[#14181F] focus:bg-white"
                 >
                   {STATUS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -632,20 +635,20 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
             {/* Personal Note Textarea with Autosave */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label htmlFor="personal-note" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="personal-note" className="text-xs font-bold text-[#556070]">
                   הערה אישית (נשמרת אוטומטית):
                 </label>
                 {noteSaveStatus === 'saving' && (
-                  <span className="text-xs text-[#536BD9] animate-pulse">שומר...</span>
+                  <span className="text-xs text-[#8F4824] animate-pulse font-medium">שומר...</span>
                 )}
                 {noteSaveStatus === 'saved' && (
-                  <span className="text-xs text-emerald-600 flex items-center gap-1">
+                  <span className="text-xs text-[#24523B] flex items-center gap-1 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     נשמר בהצלחה
                   </span>
                 )}
                 {noteSaveStatus === 'error' && (
-                  <span className="text-xs text-red-600">שגיאה בשמירה</span>
+                  <span className="text-xs text-red-600 font-medium">שגיאה בשמירה</span>
                 )}
               </div>
               <textarea
@@ -654,7 +657,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 onChange={handleNoteChange}
                 rows={3}
                 placeholder="כתבו הערות, רעיונות ליישום, מחשבות אישיות..."
-                className="w-full p-3 rounded-xl border border-slate-300 bg-white text-sm focus:ring-[#536BD9] focus:border-[#536BD9]"
+                className="w-full p-3 rounded-xl border border-[#DDD6CB] bg-white text-sm text-[#14181F] focus:border-[#1C2024] shadow-[inset_0_1px_3px_rgba(0,0,0,0.04)]"
               />
             </div>
           </div>

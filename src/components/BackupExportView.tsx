@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Info,
   ShieldAlert,
+  Trash2,
 } from 'lucide-react';
 import type { BackupFormat, LibraryItem } from '../types.ts';
 import { restoreBackup } from '../lib/api.ts';
@@ -20,6 +21,7 @@ interface BackupExportViewProps {
   selectedItemIds: Set<string>;
   filteredItems: LibraryItem[];
   onDataRestored: () => void;
+  onOpenResetModal?: () => void;
 }
 
 export const BackupExportView: React.FC<BackupExportViewProps> = ({
@@ -27,6 +29,7 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
   selectedItemIds,
   filteredItems,
   onDataRestored,
+  onOpenResetModal,
 }) => {
   const [exportScope, setExportScope] = useState<'full' | 'filtered' | 'selected'>('full');
   const [includePersonalInCsv, setIncludePersonalInCsv] = useState(false);
@@ -157,16 +160,16 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-in fade-in duration-200">
+    <div className="space-y-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-in fade-in duration-200 font-sans-hebrew">
       {/* Top Banner */}
-      <div className="glass-panel p-6 sm:p-8">
+      <div className="paper-sheet p-6 sm:p-8 rounded-2xl">
         <div className="flex items-center gap-3.5 mb-2">
-          <div className="w-10 h-10 rounded-2xl bg-[#536BD9] text-white flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#1C2024] text-[#FAF8F5] flex items-center justify-center border border-[#14181F] shadow-xs">
             <Database className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-[#17243A]">גיבוי, שחזור וייצוא נתונים</h2>
-            <p className="text-sm text-[#4A5568]">
+            <h2 className="text-2xl font-bold font-serif-hebrew text-[#14181F]">גיבוי, שחזור וייצוא נתונים</h2>
+            <p className="text-sm text-[#556070]">
               ניהול עותקי גיבוי מלאים (JSON) לשחזור הספרייה, וייצוא נתונים לטבלאות (CSV)
             </p>
           </div>
@@ -174,29 +177,29 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
       </div>
 
       {/* Scope Selector for Export */}
-      <div className="glass-panel p-6 sm:p-8 space-y-6">
+      <div className="paper-sheet p-6 sm:p-8 space-y-6 rounded-2xl">
         <div>
-          <h3 className="text-lg font-bold text-[#17243A]">1. ייצוא וגיבוי הנתונים</h3>
-          <p className="text-xs text-[#526078] mt-1">
+          <h3 className="text-lg font-bold font-serif-hebrew text-[#14181F]">1. ייצוא וגיבוי הנתונים</h3>
+          <p className="text-xs text-[#556070] mt-1">
             בחרו את היקף הנתונים ואת הפורמט הרצוי להורדה.
           </p>
         </div>
 
         {/* Scope selector */}
-        <div className="p-4 rounded-2xl bg-white/90 border border-slate-200 space-y-3">
-          <label className="text-xs font-bold text-slate-700 block">היקף הייצוא:</label>
+        <div className="p-4 rounded-xl bg-[#F2EFEB] border border-[#DDD6CB] space-y-3">
+          <label className="text-xs font-bold text-[#14181F] block">היקף הייצוא:</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               type="button"
               onClick={() => setExportScope('full')}
-              className={`p-3 rounded-xl text-right border transition-all ${
+              className={`p-3 rounded-xl text-right border transition-all cursor-pointer ${
                 exportScope === 'full'
-                  ? 'bg-indigo-50 border-[#536BD9] ring-2 ring-[#536BD9]/30 text-[#17243A]'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-white border-[#1C2024] ring-1 ring-[#1C2024] text-[#14181F] shadow-2xs'
+                  : 'bg-[#FAF8F5] border-[#DDD6CB] text-[#556070] hover:bg-white hover:text-[#14181F]'
               }`}
             >
-              <span className="font-bold text-sm block">כל המאגר ({allItems.length} פריטים)</span>
-              <span className="text-[11px] text-slate-500 block mt-0.5">
+              <span className="font-bold text-sm block font-serif-hebrew">כל המאגר ({allItems.length} פריטים)</span>
+              <span className="text-[11px] text-[#7E8896] block mt-0.5">
                 כולל כל התדריכים, הארכיון והיומנים
               </span>
             </button>
@@ -204,14 +207,14 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
             <button
               type="button"
               onClick={() => setExportScope('filtered')}
-              className={`p-3 rounded-xl text-right border transition-all ${
+              className={`p-3 rounded-xl text-right border transition-all cursor-pointer ${
                 exportScope === 'filtered'
-                  ? 'bg-indigo-50 border-[#536BD9] ring-2 ring-[#536BD9]/30 text-[#17243A]'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-white border-[#1C2024] ring-1 ring-[#1C2024] text-[#14181F] shadow-2xs'
+                  : 'bg-[#FAF8F5] border-[#DDD6CB] text-[#556070] hover:bg-white hover:text-[#14181F]'
               }`}
             >
-              <span className="font-bold text-sm block">תוצאות מסוננות ({filteredItems.length} פריטים)</span>
-              <span className="text-[11px] text-slate-500 block mt-0.5">
+              <span className="font-bold text-sm block font-serif-hebrew">תוצאות מסוננות ({filteredItems.length} פריטים)</span>
+              <span className="text-[11px] text-[#7E8896] block mt-0.5">
                 בהתאם למסנני החיפוש הפעילים בספרייה
               </span>
             </button>
@@ -222,12 +225,12 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
               disabled={selectedItemIds.size === 0}
               className={`p-3 rounded-xl text-right border transition-all ${
                 exportScope === 'selected'
-                  ? 'bg-indigo-50 border-[#536BD9] ring-2 ring-[#536BD9]/30 text-[#17243A]'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40'
+                  ? 'bg-white border-[#1C2024] ring-1 ring-[#1C2024] text-[#14181F] shadow-2xs cursor-pointer'
+                  : 'bg-[#FAF8F5] border-[#DDD6CB] text-[#556070] hover:bg-white hover:text-[#14181F] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed'
               }`}
             >
-              <span className="font-bold text-sm block">פריטים מסומנים ({selectedItemIds.size} פריטים)</span>
-              <span className="text-[11px] text-slate-500 block mt-0.5">
+              <span className="font-bold text-sm block font-serif-hebrew">פריטים מסומנים ({selectedItemIds.size} פריטים)</span>
+              <span className="text-[11px] text-[#7E8896] block mt-0.5">
                 הפריטים שסומנו ידנית באמצעות תיבות הסימון
               </span>
             </button>
@@ -237,17 +240,17 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
         {/* Action Cards: JSON vs CSV */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* JSON Full Backup Card */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between space-y-4">
+          <div className="p-6 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] shadow-2xs flex flex-col justify-between space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-[#536BD9]">
-                <FileCode className="w-5 h-5" />
-                <h4 className="font-bold text-base text-[#17243A]">גיבוי מלא — JSON</h4>
+              <div className="flex items-center gap-2 text-[#14181F]">
+                <FileCode className="w-5 h-5 text-[#8F4824]" />
+                <h4 className="font-bold text-base font-serif-hebrew text-[#14181F]">גיבוי מלא — JSON</h4>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-[#556070] leading-relaxed">
                 כולל את כל נתוני המערכת לשחזור מושלם: תוכן מלא, שדות מקוננים, מזהים יציבים, קשרי
                 תדריכים, דירוגים, הערות, תאריכים ויומן ייבוא.
               </p>
-              <div className="text-[11px] text-indigo-700 bg-indigo-50/70 p-2 rounded-lg font-medium">
+              <div className="text-[11px] text-[#8F4824] bg-[#FDF9F0] border border-[#E8DCC4] p-2 rounded-lg font-medium">
                 מיועד לשחזור מלא ומעבר בין מכשירים.
               </div>
             </div>
@@ -255,7 +258,7 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
             <button
               id="btn-download-backup-json"
               onClick={handleDownloadJson}
-              className="w-full py-2.5 px-4 rounded-xl text-sm font-bold bg-[#536BD9] hover:bg-[#4357c2] text-white shadow-xs flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl text-sm font-bold bg-[#1C2024] hover:bg-[#2D3540] text-white shadow-xs border border-[#14181F] flex items-center justify-center gap-2 transition-all active:translate-y-px cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>הורדת גיבוי JSON ({targetItems.length} פריטים)</span>
@@ -263,23 +266,23 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
           </div>
 
           {/* CSV Export Card */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between space-y-4">
+          <div className="p-6 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] shadow-2xs flex flex-col justify-between space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-emerald-700">
-                <FileSpreadsheet className="w-5 h-5" />
-                <h4 className="font-bold text-base text-[#17243A]">ייצוא לטבלה — CSV</h4>
+              <div className="flex items-center gap-2 text-[#24523B]">
+                <FileSpreadsheet className="w-5 h-5 text-[#24523B]" />
+                <h4 className="font-bold text-base font-serif-hebrew text-[#14181F]">ייצוא לטבלה — CSV</h4>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-[#556070] leading-relaxed">
                 קובץ UTF-8 עם BOM מותאם במיוחד לאקסל בעברית, הגנה מפני הזרקת נוסחאות (Formula Injection)
                 ושמירת מידע מקונן.
               </p>
 
-              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer pt-1 font-medium">
+              <label className="flex items-center gap-2 text-xs text-[#556070] cursor-pointer pt-1 font-medium">
                 <input
                   type="checkbox"
                   checked={includePersonalInCsv}
                   onChange={(e) => setIncludePersonalInCsv(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#536BD9] focus:ring-[#536BD9]"
+                  className="w-4 h-4 rounded border-[#DDD6CB] text-[#1C2024] focus:ring-[#1C2024]"
                 />
                 <span>כלול דירוגים, סטטוסים והערות אישיות בטבלה</span>
               </label>
@@ -288,9 +291,9 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
             <button
               id="btn-download-export-csv"
               onClick={handleDownloadCsv}
-              className="w-full py-2.5 px-4 rounded-xl text-sm font-bold bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-white hover:bg-[#FAF8F5] text-[#14181F] border border-[#DDD6CB] shadow-2xs flex items-center justify-center gap-2 transition-all active:translate-y-px cursor-pointer"
             >
-              <Download className="w-4 h-4 text-emerald-700" />
+              <Download className="w-4 h-4 text-[#24523B]" />
               <span>ייצוא CSV לאקסל ({targetItems.length} פריטים)</span>
             </button>
           </div>
@@ -298,25 +301,25 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
       </div>
 
       {/* Restore Section */}
-      <div className="glass-panel p-6 sm:p-8 space-y-6">
+      <div className="paper-sheet p-6 sm:p-8 space-y-6 rounded-2xl">
         <div>
-          <h3 className="text-lg font-bold text-[#17243A]">2. שחזור מגיבוי JSON</h3>
-          <p className="text-xs text-[#526078] mt-1">
-            העלו או הדביקו קובץ גיבוי בפורמט <code className="font-mono">inspiration-library-backup</code> לשחזור הספרייה.
+          <h3 className="text-lg font-bold font-serif-hebrew text-[#14181F]">2. שחזור מגיבוי JSON</h3>
+          <p className="text-xs text-[#556070] mt-1">
+            העלו או הדביקו קובץ גיבוי בפורמט <code className="font-mono bg-[#F2EFEB] px-1 py-0.5 rounded border border-[#DDD6CB]">inspiration-library-backup</code> לשחזור הספרייה.
           </p>
         </div>
 
         {/* Restore Receipt Banner */}
         {restoreReceipt && (
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center gap-3">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+          <div className="p-4 rounded-xl bg-[#F2F8F4] border border-[#24523B]/30 text-[#24523B] flex items-center gap-3">
+            <CheckCircle2 className="w-6 h-6 text-[#24523B] shrink-0" />
             <span className="text-sm font-bold">{restoreReceipt}</span>
           </div>
         )}
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <label htmlFor="restore-json-input" className="text-xs font-bold text-slate-700">
+            <label htmlFor="restore-json-input" className="text-xs font-bold text-[#14181F]">
               הדבקת תוכן קובץ הגיבוי:
             </label>
             <div className="flex items-center gap-2">
@@ -330,9 +333,9 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-xs flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#FAF8F5] hover:bg-white text-[#14181F] border border-[#DDD6CB] shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Upload className="w-3.5 h-3.5 text-[#536BD9]" />
+                <Upload className="w-3.5 h-3.5 text-[#8F4824]" />
                 <span>העלאת קובץ גיבוי</span>
               </button>
             </div>
@@ -348,12 +351,12 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
             }}
             rows={5}
             placeholder='{\n  "format": "inspiration-library-backup",\n  "version": 1,\n  "items": [...]\n}'
-            className="w-full font-mono text-xs p-3 rounded-2xl border border-slate-300 bg-white/95"
+            className="w-full font-mono text-xs p-3 rounded-xl border border-[#DDD6CB] bg-[#FAF8F5] text-[#14181F] focus:bg-white focus:border-[#1C2024] shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)]"
           />
 
           {/* Validation Errors */}
           {restoreValidationErrors.length > 0 && (
-            <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 space-y-1 text-xs">
+            <div className="p-4 rounded-xl bg-[#FEF2F2] border border-red-200 text-red-950 space-y-1 text-xs">
               <span className="font-bold block">שגיאה באימות קובץ הגיבוי:</span>
               <ul className="list-disc list-inside">
                 {restoreValidationErrors.map((err, i) => (
@@ -365,36 +368,36 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
 
           {/* Backup Summary & Confirmation */}
           {parsedBackup && (
-            <div className="p-5 rounded-2xl bg-white border border-indigo-200 shadow-xs space-y-4">
+            <div className="p-5 rounded-xl bg-[#FAF8F5] border border-[#DDD6CB] shadow-2xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-base text-[#17243A]">קובץ גיבוי מאומת ומוכן לשחזור</h4>
-                  <span className="text-xs text-slate-500">
+                  <h4 className="font-bold text-base font-serif-hebrew text-[#14181F]">קובץ גיבוי מאומת ומוכן לשחזור</h4>
+                  <span className="text-xs text-[#556070]">
                     תאריך ייצוא מקורי: {parsedBackup.exported_at} | היקף: {parsedBackup.scope}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-bold">
+                  <span className="px-2.5 py-1 rounded-lg bg-[#24523B]/10 text-[#24523B] border border-[#24523B]/20 font-bold">
                     {parsedBackup.items?.length || 0} פריטים
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-indigo-50 text-[#334BB8] font-bold">
+                  <span className="px-2.5 py-1 rounded-lg bg-[#F0EDE6] text-[#14181F] border border-[#DDD6CB] font-bold">
                     {parsedBackup.briefings?.length || 0} תדריכים
                   </span>
                 </div>
               </div>
 
               {/* Mode Selection: Merge vs Replace */}
-              <div className="p-3 bg-slate-50 rounded-xl space-y-2 text-xs">
-                <span className="font-bold text-slate-800 block">בחירת אופן השחזור:</span>
+              <div className="p-3 bg-[#F2EFEB] rounded-xl space-y-2 text-xs border border-[#DDD6CB]">
+                <span className="font-bold text-[#14181F] block">בחירת אופן השחזור:</span>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer font-medium text-[#14181F]">
                     <input
                       type="radio"
                       name="restore-mode"
                       value="merge"
                       checked={restoreMode === 'merge'}
                       onChange={() => setRestoreMode('merge')}
-                      className="text-[#536BD9] focus:ring-[#536BD9]"
+                      className="text-[#1C2024] focus:ring-[#1C2024]"
                     />
                     <span>מיזוג ללא מחיקה (מומלץ — שומר פריטים קיימים ומוסיף/מעדכן)</span>
                   </label>
@@ -414,14 +417,14 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-[#7E8896]">
                   כל המזהים והקשרים המקוריים יישמרו בדיוק כפי שהיו.
                 </span>
                 <button
                   id="btn-execute-restore"
                   onClick={handleExecuteRestore}
                   disabled={isRestoring}
-                  className="px-6 py-2.5 rounded-xl text-sm font-bold bg-[#536BD9] hover:bg-[#4357c2] text-white shadow-sm disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl text-sm font-bold bg-[#1C2024] hover:bg-[#2D3540] text-white shadow-xs border border-[#14181F] disabled:opacity-50 flex items-center gap-2 transition-all active:translate-y-px cursor-pointer"
                 >
                   {isRestoring ? (
                     <>
@@ -438,6 +441,33 @@ export const BackupExportView: React.FC<BackupExportViewProps> = ({
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Danger Zone: Database Reset & Purge */}
+      <div className="paper-sheet p-6 rounded-2xl border-rose-300 bg-[#FFF5F5] space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-200 text-rose-700 flex items-center justify-center shrink-0">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-base font-serif-hebrew text-rose-950">אזור סכנה: איפוס ומחיקת כל המאגר</h3>
+              <p className="text-xs text-rose-900/80 mt-0.5 leading-relaxed">
+                מחיקת כל הפריטים, הקישורים לתדריכים, יומני הייבוא והדירוגים האישיים השמורים במערכת ({allItems.length} פריטים כעת).
+                פעולה זו תאפשר ריקון מוחלט של מסד הנתונים או איפוס לתדריך דוגמה נקי.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="btn-reset-database"
+            onClick={onOpenResetModal}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-700 hover:bg-rose-800 active:bg-rose-900 text-white shadow-xs border border-rose-800 transition-colors flex items-center gap-2 shrink-0 self-start sm:self-center cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>איפוס ומחיקת כל המאגר...</span>
+          </button>
         </div>
       </div>
     </div>

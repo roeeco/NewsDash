@@ -161,6 +161,27 @@ async function startServer() {
     }
   });
 
+  app.post('/api/database/reset', (req, res) => {
+    try {
+      const { reseed } = req.body || {};
+      const result = db.clearDatabase(Boolean(reseed));
+      res.json(result);
+    } catch (err: unknown) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  // Alias endpoint
+  app.post('/api/reset', (req, res) => {
+    try {
+      const { reseed } = req.body || {};
+      const result = db.clearDatabase(Boolean(reseed));
+      res.json(result);
+    } catch (err: unknown) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
   app.post('/api/export/csv', (req, res) => {
     try {
       const { item_ids, include_personal } = req.body as {
